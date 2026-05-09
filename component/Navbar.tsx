@@ -16,39 +16,37 @@ export default function Navbar() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  const updateCartCount = () => {
-    const saved = localStorage.getItem("bintang_audio_cart");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setCartCount(parsed.length);
+  const loadCartCount = () => {
+    const cart = localStorage.getItem("bintang_audio_cart");
+
+    if (cart) {
+      try {
+        const parsed = JSON.parse(cart);
+        setCartCount(parsed.length);
+      } catch {
+        setCartCount(0);
+      }
     } else {
       setCartCount(0);
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    
-    // Initial cart load
-    updateCartCount();
+useEffect(() => {
+  loadCartCount();
 
-    // Listen for custom cart-update event
-    window.addEventListener("cart-updated", updateCartCount);
+  window.addEventListener("cart-updated", loadCartCount);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("cart-updated", updateCartCount);
-    };
-  }, []);
+  return () => {
+    window.removeEventListener("cart-updated", loadCartCount);
+  };
+}, []);
 
-  const links = [
-    { name: "Beranda", href: "/", icon: <Music size={18} /> },
-    { name: "Peralatan", href: "/equipment", icon: <Speaker size={18} /> },
-    { name: "Admin", href: "/admin", icon: <LayoutDashboard size={18} /> },
-    { name: "Laporan", href: "/admin/report", icon: <BarChart3 size={18} /> },
-  ];
-
+const links = [
+  { name: "Beranda", href: "/", icon: <Music size={18} /> },
+  { name: "Peralatan", href: "/equipment", icon: <Speaker size={18} /> },
+  { name: "Admin", href: "/admin", icon: <LayoutDashboard size={18} /> },
+  { name: "Laporan", href: "/admin/report", icon: <BarChart3 size={18} /> },
+];
   return (
     <>
       <nav 

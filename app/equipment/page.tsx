@@ -9,6 +9,9 @@ import { Equipment } from "@/types/equipment.type";
 import { categoryImages } from "@/constants/equipment.constant";
 import { getAvailableEquipment } from "@/services/equipment.services";
 import { getEquipment } from "@/app/actions";
+
+
+
 export default function EquipmentPage() {
   const [items, setItems] = useState<Equipment[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -54,11 +57,29 @@ export default function EquipmentPage() {
   loadData();
 }, []);
 
-  function addToCart(item: Equipment) {
-    addEquipmentToCart(item);
-    setAddedItems((prev) => new Set(prev).add(item.id));
+  const addToCart = (item: Equipment) => {
+  const existingCart = localStorage.getItem("bintang_audio_cart");
+
+  let cart: Equipment[] = [];
+
+  if (existingCart) {
+    try {
+      cart = JSON.parse(existingCart);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
+  cart.push(item);
+
+  localStorage.setItem(
+    "bintang_audio_cart",
+    JSON.stringify(cart)
+  );
+
+  // WAJIB ADA
+  window.dispatchEvent(new Event("cart-updated"));
+};
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-emerald-500">
