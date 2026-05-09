@@ -47,13 +47,13 @@ export default function Home() {
               #1 Rental Sound System
             </span>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.1]">
-              TINGKATKAN PENGALAMAN <br/>
+              Bintang Audio <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
-                AUDIO ANDA
+                Sound System Rental
               </span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto font-medium">
-              Solusi penyewaan sound system premium untuk event, konser, dan pesta. Kualitas audio jernih dengan teknisi berpengalaman.
+              Solusi penyewaan sound system premium untuk event, hajatan, dan pesta. Kualitas audio jernih dengan teknisi berpengalaman.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -121,12 +121,12 @@ export default function Home() {
             className="bg-zinc-900/80 backdrop-blur-xl border border-emerald-500/30 p-12 rounded-3xl shadow-2xl"
           >
             <Mic2 size={48} className="text-emerald-500 mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-black mb-6">Siap Membuat Acara Anda Menggelegar?</h2>
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Siap dukung acara anda dengan kualitas audio terpercaya</h2>
             <p className="text-xl text-zinc-300 mb-8">
-              Hubungi kami sekarang untuk konsultasi gratis mengenai kebutuhan audio Anda.
+              Reservasi sekarang untuk konsultasi gratis mengenai kebutuhan audio Anda.
             </p>
             <button className="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-lg px-10 py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center gap-3 mx-auto">
-              <Headphones /> Hubungi Tim Kami
+              <Headphones /> Hubungi- Heru purwanto
             </button>
           </motion.div>
         </div>
