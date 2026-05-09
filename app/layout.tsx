@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RENTAL SOUND SYSTEM PREMIUM - BINTANG AUDIO",
-  description: "Bintang Audio menyediakan layanan rental sound system berkualitas tinggi untuk berbagai acara. Dapatkan pengalaman audio terbaik dengan peralatan premium dan teknisi berpengalaman kami.",
+  title: "RENTAL BINTANG AUDIO",
+  description: "Menyediakan layanan rental sound system berkualitas tinggi untuk berbagai acara. Dapatkan pengalaman audio terbaik dengan peralatan premium dan teknisi berpengalaman kami.",
 };
 
 export default function RootLayout({

@@ -6,75 +6,45 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Check, Speaker } from "lucide-react";
 import { getEquipment } from "@/app/actions";
-
-type Equipment = {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  imageUrl: string | null;
-  status: string;
-};
-
-const categoryImages: Record<string, string> = {
-  Speaker: "1544333671-50e5091ff606",
-  Keyboard: "1511192336575-5a79af67a629",
-  Mixer: "1598653222000-f825e791b72e",
-  Microphone: "1520523839892-80ba4c9c4353",
-  Cables: "1558008258-3256797b43f3",
-  Default: "1598488035111-92523d45c61d",
-};
+import { Equipment } from "@/types/equipment.type";
+import { categoryImages } from "@/constants/equipment.constant";
+import { getAvailableEquipment } from "@/services/equipment.services";
 
 export default function EquipmentPage() {
   const [items, setItems] = useState<Equipment[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
 
+  function addEquipmentToCart(item: Equipment) {
+    if (typeof window === "undefined") return;
+
+    try {
+      const storedCart = window.localStorage.getItem("bintang-audio-cart");
+      const cart: Equipment[] = storedCart ? JSON.parse(storedCart) : [];
+
+      if (!cart.some((cartItem) => cartItem.id === item.id)) {
+        cart.push(item);
+        window.localStorage.setItem("bintang-audio-cart", JSON.stringify(cart));
+      }
+    } catch {
+      // ignore localStorage errors
+    }
+  }
+
   useEffect(() => {
     async function loadData() {
-      const result = await getEquipment();
-      if (result.success && result.data) {
-        // Only show available items for rent
-        setItems(result.data.filter((item: any) => item.status === "AVAILABLE"));
-      } else {
-        console.error(result.error);
-      }
+      const availableItems = await getAvailableEquipment();
+      setItems(availableItems);
       setIsLoaded(true);
     }
 
     loadData();
   }, []);
 
-  const addToCart = (item: Equipment) => {
-    const existingCart = localStorage.getItem("bintang_audio_cart");
-    let cart: Equipment[] = [];
-
-    if (existingCart) {
-      try {
-        cart = JSON.parse(existingCart);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    cart.push(item);
-    localStorage.setItem("bintang_audio_cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cart-updated"));
-
-    setAddedItems((prev) => {
-      const next = new Set(prev);
-      next.add(item.id);
-      return next;
-    });
-
-    setTimeout(() => {
-      setAddedItems((prev) => {
-        const next = new Set(prev);
-        next.delete(item.id);
-        return next;
-      });
-    }, 2000);
-  };
+  function addToCart(item: Equipment) {
+    addEquipmentToCart(item);
+    setAddedItems((prev) => new Set(prev).add(item.id));
+  }
 
   if (!isLoaded) {
     return (

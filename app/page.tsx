@@ -8,12 +8,12 @@ import { Speaker, Mic2, Settings2, ShieldCheck, Zap, Headphones } from "lucide-r
 export default function Home() {
   const features = [
     {
-      title: "Peralatan Premium",
+      title: "Peralatan Berkualitas",
       description: "Kami hanya menyewakan peralatan audio berkualitas tinggi dari merek ternama untuk menjamin kejernihan suara.",
       icon: <Speaker size={32} />
     },
     {
-      title: "Teknisi Ahli",
+      title: "Teknisi Profesional",
       description: "Tim teknisi kami siap membantu setup dan standby selama acara Anda berlangsung.",
       icon: <Settings2 size={32} />
     },
