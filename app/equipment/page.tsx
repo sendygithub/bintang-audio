@@ -5,7 +5,6 @@ import Navbar from "@/component/Navbar";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Check, Speaker } from "lucide-react";
-import { getEquipment } from "@/app/actions";
 import { Equipment } from "@/types/equipment.type";
 import { categoryImages } from "@/constants/equipment.constant";
 import { getAvailableEquipment } from "@/services/equipment.services";
