@@ -8,7 +8,7 @@ import { ShoppingCart, Check, Speaker } from "lucide-react";
 import { Equipment } from "@/types/equipment.type";
 import { categoryImages } from "@/constants/equipment.constant";
 import { getAvailableEquipment } from "@/services/equipment.services";
-
+import { getEquipment } from "@/app/actions";
 export default function EquipmentPage() {
   const [items, setItems] = useState<Equipment[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -31,14 +31,28 @@ export default function EquipmentPage() {
   }
 
   useEffect(() => {
-    async function loadData() {
-      const availableItems = await getAvailableEquipment();
-      setItems(availableItems);
+  async function loadData() {
+    try {
+      const result = await getEquipment();
+
+      if (result.success && result.data) {
+        setItems(
+          result.data.filter(
+            (item: any) => item.status === "AVAILABLE"
+          )
+        );
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("LOAD ERROR:", error);
+    } finally {
       setIsLoaded(true);
     }
+  }
 
-    loadData();
-  }, []);
+  loadData();
+}, []);
 
   function addToCart(item: Equipment) {
     addEquipmentToCart(item);
