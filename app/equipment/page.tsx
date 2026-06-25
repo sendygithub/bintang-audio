@@ -2,181 +2,380 @@
 "use client";
 
 import Navbar from "@/component/Navbar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Check, Speaker } from "lucide-react";
+import {
+  ShoppingCart,
+  Check,
+  Speaker,
+  Search,
+  SlidersHorizontal,
+  X,
+  Volume2,
+  Mic2,
+  Disc3,
+  Radio,
+  Headphones,
+} from "lucide-react";
 import { Equipment } from "@/types/equipment.type";
 import { categoryImages } from "@/constants/equipment.constant";
-import { getAvailableEquipment } from "@/services/equipment.services";
 import { getEquipment } from "@/app/actions";
 
+const categoryIcons: Record<string, React.ReactNode> = {
+  Speaker: <Volume2 size={16} />,
+  Mixer: <SlidersHorizontal size={16} />,
+  Microphone: <Mic2 size={16} />,
+  Amplifier: <Radio size={16} />,
+  Lighting: <Disc3 size={16} />,
+  Effect: <Disc3 size={16} />,
+  DJ: <Headphones size={16} />,
+};
 
+const categories = [
+  "Semua",
+  "Speaker",
+  "Mixer",
+  "Microphone",
+  "Amplifier",
+  "Lighting",
+  "Effect",
+  "DJ",
+];
 
 export default function EquipmentPage() {
   const [items, setItems] = useState<Equipment[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
-
-  function addEquipmentToCart(item: Equipment) {
-    if (typeof window === "undefined") return;
-
-    try {
-      const storedCart = window.localStorage.getItem("bintang-audio-cart");
-      const cart: Equipment[] = storedCart ? JSON.parse(storedCart) : [];
-
-      if (!cart.some((cartItem) => cartItem.id === item.id)) {
-        cart.push(item);
-        window.localStorage.setItem("bintang-audio-cart", JSON.stringify(cart));
-      }
-    } catch {
-      // ignore localStorage errors
-    }
-  }
+  const [activeCategory, setActiveCategory] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  const cardRefs = useRef<Map<string, IntersectionObserverEntry>>(new Map());
 
   useEffect(() => {
-  async function loadData() {
-    try {
-      const result = await getEquipment();
-
-      if (result.success && result.data) {
-        setItems(
-          result.data.filter(
-            (item: any) => item.status === "AVAILABLE"
-          )
-        );
-      } else {
-        console.error(result.error);
+    async function loadData() {
+      try {
+        const result = await getEquipment();
+        if (result.success && result.data) {
+          setItems(
+            result.data.filter((item: any) => item.status === "AVAILABLE"),
+          );
+        }
+      } catch (error) {
+        console.error("LOAD ERROR:", error);
+      } finally {
+        setIsLoaded(true);
       }
-    } catch (error) {
-      console.error("LOAD ERROR:", error);
-    } finally {
-      setIsLoaded(true);
     }
-  }
+    loadData();
+  }, []);
 
-  loadData();
-}, []);
+  // Intersection Observer for power-on animation
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleItems((prev) => new Set(prev).add(entry.target.id));
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+
+    // Observe all equipment cards
+    document.querySelectorAll("[data-equipment-id]").forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [isLoaded, activeCategory, searchQuery]);
 
   const addToCart = (item: Equipment) => {
-  const existingCart = localStorage.getItem("bintang_audio_cart");
-
-  let cart: Equipment[] = [];
-
-  if (existingCart) {
-    try {
-      cart = JSON.parse(existingCart);
-    } catch (error) {
-      console.error(error);
+    const existingCart = localStorage.getItem("bintang_audio_cart");
+    let cart: Equipment[] = [];
+    if (existingCart) {
+      try {
+        cart = JSON.parse(existingCart);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }
+    cart.push(item);
+    localStorage.setItem("bintang_audio_cart", JSON.stringify(cart));
+    window.dispatchEvent(new Event("cart-updated"));
 
-  cart.push(item);
+    setAddedItems((prev) => new Set(prev).add(item.id));
+    setTimeout(() => {
+      setAddedItems((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }, 2000);
+  };
 
-  localStorage.setItem(
-    "bintang_audio_cart",
-    JSON.stringify(cart)
-  );
+  const filteredItems = items.filter((item) => {
+    const matchesCategory =
+      activeCategory === "Semua" || item.category === activeCategory;
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  // WAJIB ADA
-  window.dispatchEvent(new Event("cart-updated"));
-};
+  // Featured items (first 2 for visual prominence)
+  const featuredItems = filteredItems.slice(0, 2);
+  const regularItems = filteredItems.slice(2);
+
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-emerald-500">
-        Memuat Galeri...
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm text-[#52525B] tracking-wider uppercase">
+            Memuat Peralatan...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans selection:bg-emerald-500/30 pb-24">
+    <div className="bg-[#0A0A0A] min-h-screen text-white selection:bg-amber-500/30 pb-24">
       <Navbar />
 
-      <main className="pt-32 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-4xl md:text-6xl font-black mb-4">
-              Galeri <span className="text-emerald-500">Peralatan</span>
-            </h1>
-            <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-              Telusuri pilihan sound system premium dan instrumen yang tersedia untuk disewa.
-            </p>
-          </motion.div>
+      <main className="pt-28 px-6 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-12">
+          <span className="spec-label block mb-4">Katalog</span>
+          <h1 className="font-display text-6xl md:text-8xl leading-[0.85] text-white mb-4">
+            PERALATAN
+            <br />
+            <span className="text-amber-500">KAMI</span>
+          </h1>
+          <p className="text-[#A1A1AA] max-w-xl">
+            Dari speaker line array sampai wireless mic — semua siap pakai,
+            terawat, dan diinspeksi sebelum dikirim.
+          </p>
         </div>
 
-        {items.length === 0 ? (
-          <div className="text-center py-24 bg-zinc-900/30 rounded-3xl border border-zinc-800">
-            <Speaker size={48} className="mx-auto text-zinc-600 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Tidak Ada Peralatan Tersedia</h2>
-            <p className="text-zinc-400">
-              Semua peralatan kami sedang disewa atau belum ditambahkan oleh admin.
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-10">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-[#52525B]"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari peralatan..."
+              className="w-full pl-10 pr-10 py-3 bg-[#111111] border border-[#1F1F1F] text-sm text-white placeholder:text-[#52525B] focus:outline-none focus:border-amber-500/40 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#52525B] hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 text-xs font-bold tracking-wider uppercase transition-all ${
+                  activeCategory === cat
+                    ? "bg-amber-500 text-black"
+                    : "bg-[#111111] border border-[#1F1F1F] text-[#52525B] hover:text-white hover:border-amber-500/30"
+                }`}
+              >
+                {cat === "Semua" ? "Semua" : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {filteredItems.length === 0 ? (
+          <div className="border border-[#1F1F1F] bg-[#111111] p-16 text-center">
+            <Speaker size={48} className="mx-auto text-[#52525B] mb-4" />
+            <h2 className="font-display text-3xl text-white mb-2">
+              TIDAK DITEMUKAN
+            </h2>
+            <p className="text-[#52525B] text-sm mb-6">
+              {searchQuery
+                ? `Tidak ada hasil untuk "${searchQuery}"`
+                : "Semua peralatan sedang disewa. Cek lagi nanti atau hubungi kami."}
             </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="px-6 py-3 bg-amber-500 text-black font-bold text-sm tracking-wider uppercase hover:bg-amber-400 transition-all"
+              >
+                Reset Filter
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {items.map((item, index) => {
-              // Priority: Database Image URL -> Map Category Fallback -> Default
-              const fallbackImageId = categoryImages[item.category] || categoryImages.Default;
-              const imageUrl = item.imageUrl || `https://images.unsplash.com/photo-${fallbackImageId}?q=80&w=600&auto=format&fit=crop`;
-              const isAdded = addedItems.has(item.id);
+          <>
+            {/* Featured Items — larger, prominent */}
+            {featuredItems.length > 0 && (
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                {featuredItems.map((item, index) => {
+                  const fallbackImageId =
+                    categoryImages[item.category] || categoryImages.Default;
+                  const imageUrl =
+                    item.imageUrl ||
+                    `https://images.unsplash.com/photo-${fallbackImageId}?q=80&w=800&auto=format&fit=crop`;
 
-              return (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-zinc-900/80 border border-zinc-800 rounded-3xl overflow-hidden group hover:border-emerald-500/50 transition-colors flex flex-col"
-                >
-                  <div className="relative h-48 w-full overflow-hidden bg-zinc-950">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                    />
-                    <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-xs font-bold text-emerald-400">
-                      {item.category}
-                    </div>
-                  </div>
-
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold mb-2 line-clamp-2" title={item.name}>
-                        {item.name}
-                      </h3>
-                      <p className="text-2xl font-black text-white mb-6">
-                        Rp {item.price.toLocaleString("id-ID")}
-                        <span className="text-sm font-normal text-zinc-500"> / hari</span>
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => addToCart(item)}
-                      disabled={isAdded}
-                      className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isAdded
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
-                        : "bg-zinc-800 hover:bg-emerald-500 text-white hover:text-black border border-zinc-700 hover:border-emerald-500"
-                        }`}
+                  return (
+                    <div
+                      key={item.id}
+                      id={`equipment-${item.id}`}
+                      data-equipment-id={item.id}
+                      className="relative border border-[#1F1F1F] bg-[#111111] overflow-hidden group"
                     >
-                      {isAdded ? (
-                        <>
-                          <Check size={18} /> Sewa Alat Ini
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart size={18} /> Sewa Alat Ini
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                      <div className="aspect-[16/9] overflow-hidden bg-[#0A0A0A] relative">
+                        <img
+                          src={imageUrl}
+                          alt={item.name}
+                          className={`w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ${
+                            visibleItems.has(`equipment-${item.id}`)
+                              ? "power-on"
+                              : ""
+                          }`}
+                        />
+                        {/* Scan line overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent pointer-events-none"></div>
+
+                        {/* Category badge */}
+                        <div className="absolute top-4 left-4 bg-[#0A0A0A]/80 border border-[#1F1F1F] px-3 py-1 flex items-center gap-2">
+                          <span className="text-amber-500">
+                            {categoryIcons[item.category] || (
+                              <Volume2 size={14} />
+                            )}
+                          </span>
+                          <span className="text-xs text-[#A1A1AA] tracking-wider uppercase">
+                            {item.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <h3 className="font-display text-2xl tracking-wider text-white mb-2 group-hover:text-amber-500 transition-colors">
+                          {item.name.toUpperCase()}
+                        </h3>
+                        <p className="text-2xl font-bold text-amber-500 mb-4">
+                          Rp {item.price.toLocaleString("id-ID")}
+                          <span className="text-sm text-[#52525B] font-normal">
+                            /hari
+                          </span>
+                        </p>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="w-full py-3 bg-[#1F1F1F] hover:bg-amber-500 hover:text-black text-white font-bold text-sm tracking-wider uppercase transition-all flex items-center justify-center gap-2"
+                        >
+                          {addedItems.has(item.id) ? (
+                            <>
+                              <Check size={16} /> Ditambahkan
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart size={16} /> Tambah ke Pesanan
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Regular Items — grid */}
+            {regularItems.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {regularItems.map((item, index) => {
+                  const fallbackImageId =
+                    categoryImages[item.category] || categoryImages.Default;
+                  const imageUrl =
+                    item.imageUrl ||
+                    `https://images.unsplash.com/photo-${fallbackImageId}?q=80&w=600&auto=format&fit=crop`;
+
+                  return (
+                    <div
+                      key={item.id}
+                      id={`equipment-${item.id}`}
+                      data-equipment-id={item.id}
+                      className="relative border border-[#1F1F1F] bg-[#111111] overflow-hidden group"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden bg-[#0A0A0A] relative">
+                        <img
+                          src={imageUrl}
+                          alt={item.name}
+                          className={`w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 ${
+                            visibleItems.has(`equipment-${item.id}`)
+                              ? "power-on"
+                              : ""
+                          }`}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent pointer-events-none"></div>
+
+                        <div className="absolute top-3 left-3 bg-[#0A0A0A]/80 border border-[#1F1F1F] px-2 py-0.5 flex items-center gap-1.5">
+                          <span className="text-amber-500">
+                            {categoryIcons[item.category] || (
+                              <Volume2 size={12} />
+                            )}
+                          </span>
+                          <span className="text-[10px] text-[#A1A1AA] tracking-wider uppercase">
+                            {item.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="font-display text-sm tracking-wider text-white mb-1 truncate">
+                          {item.name.toUpperCase()}
+                        </h3>
+                        <p className="text-base font-bold text-amber-500 mb-3">
+                          Rp {item.price.toLocaleString("id-ID")}
+                          <span className="text-[10px] text-[#52525B] font-normal">
+                            /hari
+                          </span>
+                        </p>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="w-full py-2 bg-[#1F1F1F] hover:bg-amber-500 hover:text-black text-white font-bold text-[11px] tracking-wider uppercase transition-all flex items-center justify-center gap-1.5"
+                        >
+                          {addedItems.has(item.id) ? (
+                            <>
+                              <Check size={12} /> Ditambahkan
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart size={12} /> Tambah
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
   );
 }
-

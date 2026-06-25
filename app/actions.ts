@@ -1,8 +1,6 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // --- EQUIPMENT ACTIONS ---
 export async function getEquipment() {
@@ -39,12 +37,15 @@ export async function addEquipment(data: {
   }
 }
 
-export async function updateEquipment(id: string, data: {
-  name?: string;
-  category?: string;
-  price?: number;
-  status?: string;
-}) {
+export async function updateEquipment(
+  id: string,
+  data: {
+    name?: string;
+    category?: string;
+    price?: number;
+    status?: string;
+  },
+) {
   try {
     const updatedItem = await prisma.equipment.update({
       where: { id },
@@ -85,7 +86,7 @@ export async function createBooking(data: {
     // 1. Create or Find Customer
     // Since we don't have full auth, we use phone number as pseudo-identifier
     const customerEmail = `${data.customerPhone.replace(/\\D/g, "")}@guest.com`;
-    
+
     const user = await prisma.user.upsert({
       where: { email: customerEmail },
       update: { name: data.customerName, phone: data.customerPhone },
@@ -123,7 +124,7 @@ export async function createBooking(data: {
             priceAtRent: eq.price,
           },
         });
-        
+
         // Mark as rented temporarily
         await prisma.equipment.update({
           where: { id: eq.id },

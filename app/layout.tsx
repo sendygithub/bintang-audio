@@ -1,20 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import SessionProvider from "@/component/SessionProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bebasNeue = Bebas_Neue({
+  variable: "--font-display",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "RENTAL BINTANG AUDIO",
-  description: "Menyediakan layanan rental sound system berkualitas tinggi untuk berbagai acara. Dapatkan pengalaman audio terbaik dengan peralatan premium dan teknisi berpengalaman kami.",
+  title: "BINTANG AUDIO — Rental Sound System Premium",
+  description:
+    "Suara yang menggetarkan. Peralatan yang tepat waktu. Rental sound system premium untuk wedding, konser, dan corporate event di Tangerang & Jakarta.",
+  keywords: [
+    "rental sound system",
+    "sewa sound system",
+    "audio rental",
+    "bintang audio",
+    "sound system tangerang",
+    "sewa speaker",
+  ],
 };
 
 export default function RootLayout({
@@ -24,10 +40,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="id"
+      className={`${inter.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SessionProvider>{children}</SessionProvider>
+      </body>
     </html>
   );
 }

@@ -1,101 +1,115 @@
-/* eslint-disable */
-"use client";
-
-import { motion } from "framer-motion";
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Music2, 
-  Speaker,
-  Disc3
-} from "lucide-react";
+import { Volume2, MapPin, Phone, Mail, Clock, Zap } from "lucide-react";
+import Link from "next/link";
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="bg-black border-t border-emerald-500/10 pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          
-          {/* Brand Section */}
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-500">
-                <Music2 size={24} />
+    <footer className="bg-[#0A0A0A] border-t border-[#1F1F1F]">
+      {/* Top Section */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="grid md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-[#111111] border border-[#1F1F1F] text-amber-500">
+                <Volume2 size={24} />
               </div>
-              <span className="text-white font-black text-2xl tracking-tighter">
-                BINTANG<span className="text-emerald-500">AUDIO</span>
+              <span className="font-display text-xl tracking-wider text-white">
+                BINTANG<span className="text-amber-500">AUDIO</span>
               </span>
             </div>
-            <p className="text-zinc-500 text-sm leading-relaxed mb-6">
-              Solusi penyewaan sound system premium untuk event, konser, dan pesta. Kualitas audio jernih dengan teknisi berpengalaman.
+            <p className="text-xs text-[#52525B] leading-relaxed max-w-xs">
+              Rental sound system premium untuk wedding, konser, dan corporate
+              event. Suara yang menggetarkan, peralatan yang tepat waktu.
             </p>
-           
-          </div>
-
-          {/* Services Links */}
-          <div>
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
-              <Speaker size={16} className="text-emerald-500" /> Layanan
-            </h4>
-            <ul className="space-y-4">
-              {["Paket Pernikahan", "Sound Konser", "Acara Perusahaan", "Sewa Studio"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-zinc-500 hover:text-emerald-400 text-sm transition-colors">
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-bold mb-6 flex items-center gap-2">
-              <Disc3 size={16} className="text-emerald-500" /> Eksplorasi
-            </h4>
-            <ul className="space-y-4">
-              {["Tentang Kami", "Peralatan Kami", "Paket Harga", "Testimoni"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-zinc-500 hover:text-emerald-400 text-sm transition-colors">
-                    {item}
-                  </a>
+            <h3 className="font-bold text-xs tracking-[0.15em] uppercase text-white mb-4">
+              Navigasi
+            </h3>
+            <ul className="space-y-2.5">
+              {[
+                { name: "Beranda", href: "/" },
+                { name: "Peralatan", href: "/equipment" },
+                { name: "Booking", href: "/checkout" },
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-xs text-[#52525B] hover:text-amber-500 transition-colors"
+                  >
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <div>
-            <h4 className="text-white font-bold mb-6">Hubungi Kami</h4>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-zinc-500 text-sm">
-                <MapPin size={18} className="text-emerald-500 shrink-0" />
-                <span>Area Curug,Tangerang, Banten, Indonesia</span>
+            <h3 className="font-bold text-xs tracking-[0.15em] uppercase text-white mb-4">
+              Kontak
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <Phone size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <a
+                  href="https://wa.me/6281281916880"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-[#52525B] hover:text-amber-500 transition-colors"
+                >
+                  +62 812-8191-6880
+                </a>
               </li>
-              <li className="flex items-center gap-3 text-zinc-500 text-sm">
-                <Phone size={18} className="text-emerald-500 shrink-0" />
-                <span>0812-8191-6880</span>
+              <li className="flex items-start gap-3">
+                <MapPin size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <span className="text-xs text-[#52525B]">
+                  Tangerang, Banten
+                </span>
               </li>
-              <li className="flex items-center gap-3 text-zinc-500 text-sm">
-                <Mail size={18} className="text-emerald-500 shrink-0" />
-                <span>hello@bintang-audio.com</span>
+              <li className="flex items-start gap-3">
+                <Clock size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <span className="text-xs text-[#52525B]">
+                  Senin - Sabtu: 08:00 - 20:00
+                </span>
               </li>
             </ul>
           </div>
-        </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-zinc-600 text-xs text-center md:text-left">
-            © {currentYear} Bintang Audio Rental. Hak Cipta Dilindungi.
-          </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-zinc-600 hover:text-zinc-400 text-xs">Kebijakan Privasi</a>
-            <a href="#" className="text-zinc-600 hover:text-zinc-400 text-xs">Syarat & Ketentuan</a>
+          {/* CTA */}
+          <div>
+            <h3 className="font-bold text-xs tracking-[0.15em] uppercase text-white mb-4">
+              Sewa Sekarang
+            </h3>
+            <p className="text-xs text-[#52525B] mb-4 leading-relaxed">
+              Konsultasi gratis. Tim kami siap bantu pilih konfigurasi sound
+              system yang pas.
+            </p>
+            <a
+              href="https://wa.me/6281281916880"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-amber-500 text-black font-bold text-xs tracking-wider uppercase hover:bg-amber-400 transition-all"
+            >
+              <Zap size={16} /> Hubungi Kami
+            </a>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-[#1F1F1F] py-6">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-[#52525B]">
+            &copy; {new Date().getFullYear()} Bintang Audio. All rights
+            reserved.
+          </p>
+          <p className="text-xs text-[#52525B]">
+            Didesain dengan <span className="text-amber-500">&hearts;</span>{" "}
+            untuk suara terbaik.
+          </p>
         </div>
       </div>
     </footer>
