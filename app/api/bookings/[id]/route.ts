@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/src/lib/auth";
+import {
+  changeBookingStatus,
+  removeBooking,
+} from "@/src/services/booking.service";
 
 export async function PATCH(
   req: Request,
@@ -16,47 +19,13 @@ export async function PATCH(
     const { id } = await params;
     const { status } = await req.json();
 
-    const validStatuses = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: "Status tidak valid" },
-        { status: 400 },
-      );
+    const result = await changeBookingStatus(id, status);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const booking = await prisma.booking.update({
-      where: { id },
-      data: { status },
-      include: {
-        items: {
-          include: {
-            equipment: true,
-          },
-        },
-      },
-    });
-
-    // If cancelled or completed, set equipment back to AVAILABLE
-    if (status === "CANCELLED" || status === "COMPLETED") {
-      for (const item of booking.items) {
-        await prisma.equipment.update({
-          where: { id: item.equipmentId },
-          data: { status: "AVAILABLE" },
-        });
-      }
-    }
-
-    // If confirmed, set equipment to RENTED
-    if (status === "CONFIRMED") {
-      for (const item of booking.items) {
-        await prisma.equipment.update({
-          where: { id: item.equipmentId },
-          data: { status: "RENTED" },
-        });
-      }
-    }
-
-    return NextResponse.json({ success: true, data: booking });
+    return NextResponse.json({ success: true, data: result.data });
   } catch (error) {
     console.error("Failed to update booking:", error);
     return NextResponse.json(
@@ -78,38 +47,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const result = await removeBooking(id);
 
-    // Get booking items first to restore equipment status
-    const booking = await prisma.booking.findUnique({
-      where: { id },
-      include: {
-        items: true,
-      },
-    });
-
-    if (!booking) {
-      return NextResponse.json(
-        { error: "Booking tidak ditemukan" },
-        { status: 404 },
-      );
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
-    // Restore equipment status
-    for (const item of booking.items) {
-      await prisma.equipment.update({
-        where: { id: item.equipmentId },
-        data: { status: "AVAILABLE" },
-      });
-    }
-
-    // Delete booking items first, then booking
-    await prisma.bookingItem.deleteMany({
-      where: { bookingId: id },
-    });
-
-    await prisma.booking.delete({
-      where: { id },
-    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

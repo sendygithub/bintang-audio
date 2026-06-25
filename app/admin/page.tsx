@@ -131,7 +131,7 @@ export default function AdminPage() {
       name: formData.name,
       category: formData.category,
       price: parseInt(formData.price),
-      status: formData.status,
+      status: formData.status as "AVAILABLE" | "RENTED" | "MAINTENANCE",
     });
 
     if (result.success) {
@@ -163,7 +163,11 @@ export default function AdminPage() {
       name: editFormData.name,
       category: editFormData.category,
       price: parseInt(editFormData.price),
-      status: editFormData.status,
+      status: editFormData.status as
+        | "AVAILABLE"
+        | "RENTED"
+        | "MAINTENANCE"
+        | undefined,
     });
 
     if (result.success) {

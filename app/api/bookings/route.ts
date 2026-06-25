@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/src/lib/auth";
+import { getBookings } from "@/src/services/booking.service";
 
 export async function GET() {
   try {
@@ -10,39 +10,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const userRole = session.user.role;
+    const result = await getBookings(session.user.id, session.user.role);
 
-    // If admin, return all bookings. If customer, return only their bookings.
-    const whereClause = userRole === "ADMIN" ? {} : { userId };
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
+    }
 
-    const bookings = await prisma.booking.findMany({
-      where: whereClause,
-      include: {
-        items: {
-          include: {
-            equipment: {
-              select: {
-                name: true,
-                category: true,
-              },
-            },
-          },
-        },
-        user: {
-          select: {
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return NextResponse.json({ success: true, data: bookings });
+    return NextResponse.json({ success: true, data: result.data });
   } catch (error) {
     console.error("Failed to fetch bookings:", error);
     return NextResponse.json(

@@ -1,10 +1,2 @@
-// src/types/equipment.type.ts
-
-export type Equipment = {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  imageUrl: string | null;
-  status: string;
-};
+// Re-export from new src/types
+export type { Equipment } from "@/src/types";
